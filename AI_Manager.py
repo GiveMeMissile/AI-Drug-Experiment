@@ -4,7 +4,7 @@ from Drugs import Object
 
 
 class AIManager:
-    def __init__(player, ais, hidden_size, input_size, output_size, layers):
+    def __init__():
         pass
 
 
