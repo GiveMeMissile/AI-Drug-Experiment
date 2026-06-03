@@ -1,9 +1,71 @@
 class Grid:
+
     def __init__(self, num_rows, num_columns):
+
+        # Create Grid
         self.grid = []
-        for i in range(num_rows):
+        for _ in range(num_rows):
             g = []
             for _ in range(num_columns):
                 g.append(None)
             self.grid.append(g)
+
+        # Save other important variables
         self.num_objects = 0
+        self.num_rows = num_rows
+        self.num_columns = num_columns
+
+    def adjust_positions(self, x, y):
+        # Adjusts the inputted position values if they are out of the range of the grid
+
+        if x > self.num_columns - 1:
+            x = self.num_columns - 1
+        elif x < 0:
+            x = 0
+
+        if y > self.num_rows - 1:
+            y = self.num_rows - 1
+        elif y < 0:
+            y = 0
+        
+        return x, y
+
+    def add_object(self, x, y, obj):
+        # Adds an object to the grid environment
+        x, y = self.adjust_positions(x, y)
+
+        self.num_objects += 1
+        self.grid[y][x] = obj
+
+    def remove_object(self, x, y):
+        # Removed an object from the grid enviornment
+
+        new_x, new_y = self.adjust_positions(x, y)
+        if (not new_x == x) or (not new_y == y):
+            return False
+
+        if self.grid[y][x] is None:
+            return False
+        
+        self.num_objects -= 1
+        self.grid[y][x] = None
+        return True
+    
+    def move_object(self, old_x, old_y, x, y):
+        # Moves an object from one position to another
+
+        new_x, new_y = self.adjust_positions(old_x, old_y)
+        if (not new_x == old_x) or (not new_y == old_y):
+            return False
+        
+        obj = self.grid[old_y][old_x]
+        self.remove_object(old_x, old_y)
+        self.add_object(x, y, obj)
+
+    def object_exists_at(self, x, y):
+        # Checks if an object exists at the inputted location of the grid.
+
+        x, y = self.adjust_positions(x, y)
+        if self.grid[y][x] is None:
+            return False
+        return True

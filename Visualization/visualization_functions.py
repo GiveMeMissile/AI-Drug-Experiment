@@ -23,11 +23,9 @@ def create_grid():
     for _ in range(10):
         row = []
         x = 0
-        print(y)
         for _ in range(20):
             row.append(grid_object.GridObject(vc.GRID_BOX_DIM, x, y, vc.GRID_THICKNESS))
             x += vc.GRID_BOX_DIM - vc.GRID_THICKNESS
-            print(x)
         grid.append(row)
         y += vc.GRID_BOX_DIM - vc.GRID_THICKNESS
     return grid
