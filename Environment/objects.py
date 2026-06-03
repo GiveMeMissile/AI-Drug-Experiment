@@ -1,5 +1,3 @@
-
-
 class Object:
     pass
 
