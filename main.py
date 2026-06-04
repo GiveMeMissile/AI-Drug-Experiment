@@ -1,6 +1,6 @@
 from Visualization.visualization_functions import visual_loop
 from Visualization import visual_constants as vc
-from Environment.environment_functions import timestep
+from Environment.environment_functions import headless_loop
 import pygame
 
 HEADLESS = False
@@ -10,4 +10,4 @@ if __name__ == "__main__":
         window = pygame.display.set_mode((vc.WINDOW_X, vc.WINDOW_Y))
         visual_loop(window)
     else:
-        timestep()
+        headless_loop()
