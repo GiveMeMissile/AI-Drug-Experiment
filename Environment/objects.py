@@ -1,3 +1,4 @@
+from Environment import environmental_constants as ec
 import random
 
 class Object:
@@ -57,7 +58,43 @@ class Food(Object):
 
 
 class AI_Agent(Object):
-    pass
+    
+    def __init__(self, x, y, grid):
+        super().__init__(x, y, ec.AGENT_DECAY , 1)
+        self.grid = grid
+
+    def count_timestep(self):
+        super().count_timestep()
+        self.initial_value -= self.rate_of_decay
+
+    def move(self):
+        # Moves the AI to a different location
+
+        # Simulates AI choice
+        direction = [random.random(), random.random(), random.random(), random.random()]
+        value = direction.index(max(direction))
+        old_x = self.x
+        old_y = self.y
+        if value == 0:
+            self.y += 1
+        elif value == 1:
+            self.y -= 1
+        elif value == 2:
+            self.x += 1
+        elif value == 3:
+            self.x -= 1
+
+        self.grid.move_object(old_x, old_y, self.x, self.y)
+    
+    def get_blue(self):
+        return 0
+    
+    def get_red(self):
+        return 255
+    
 
 class Drug(Object):
-    pass
+
+    def get_green(self):
+        # No Green for Drugs
+        return 0

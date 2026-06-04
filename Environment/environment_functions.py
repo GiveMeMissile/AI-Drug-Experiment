@@ -24,10 +24,16 @@ def timestep(grid):
     for obj_info in all_objs:
         obj_info[0].update_location(obj_info[1], obj_info[2])
         obj_info[0].count_timestep()
+
         if isinstance(obj_info[0], obj.Food):
             value = obj_info[0].calculate_current_value()
             if value < -1:
                 grid.remove_object(obj_info[1], obj_info[2])
+
+        if isinstance(obj_info[0], obj.AI_Agent):
+            if obj_info[0].initial_value < 0:
+                grid.remove_object(obj_info[1], obj_info[2])
+            obj_info[0].move()
 
 
 def spawn_foods(grid):

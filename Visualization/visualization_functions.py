@@ -1,6 +1,7 @@
 from Environment.environment_functions import timestep
 from Environment import environmental_constants as ec
 from Visualization import visual_constants as vc
+from Environment.objects import AI_Agent
 from Visualization import grid_object
 from Environment.grid import Grid
 import pygame
@@ -12,6 +13,8 @@ def visual_loop(window):
     clock = pygame.time.Clock()
     visual_grid = create_grid()
     grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
+    agent = AI_Agent(10, 10, grid)
+    grid.add_object(10, 10, agent)
     delay = pygame.time.get_ticks()
     while running:
         for event in pygame.event.get():
