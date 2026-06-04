@@ -1,0 +1,2 @@
+class AIManager:
+    pass
