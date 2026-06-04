@@ -9,24 +9,28 @@ class Object:
         self.initial_value = initial_value
         self.num_timesteps = 0
     
-    def count_time(self):
+    def update_location(self, x, y):
+        self.x = x
+        self.y = y
+
+    def count_timestep(self):
         # Counts the timesteps based on when it is called
 
         self.num_timesteps += 1
 
-    def calculate_green(self):
+    def get_green(self):
         # Calculates amount of green of the rgb based on the object's variables.
 
-        g = 255/2 - (self.initial_value - self.rate_of_decay*self.num_timesteps)*(255/2)
+        g = 255/2 + (self.initial_value - self.rate_of_decay*self.num_timesteps)*(255/2)
         return g
     
-    def calculate_blue(self):
+    def get_blue(self):
         # Calculates the amount of blue of the rgb based on the object's variables.
 
-        b = (1 - 10(self.rate_of_decay))*(255)
+        b = (1 - 10*(self.rate_of_decay))*(255)
         return b
     
-    def calculate_red(self):
+    def get_red(self):
         # Calculates the red in rgb, unused for all Objects except AI_Agent
 
         return 0

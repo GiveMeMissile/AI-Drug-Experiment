@@ -1,3 +1,5 @@
+import Environment.objects as objs
+
 class Grid:
 
     def __init__(self, num_rows, num_columns):
@@ -66,6 +68,15 @@ class Grid:
         # Checks if an object exists at the inputted location of the grid.
 
         x, y = self.adjust_positions(x, y)
-        if self.grid[y][x] is None:
-            return False
-        return True
+        if isinstance(self.grid[y][x], objs.Object):
+            return True
+        return False
+    
+    def get_all_objects(self):
+        all_objs = []
+        for i in range(self.num_rows):
+            for j in range(self.num_columns):
+                if isinstance(self.grid[i][j], objs.Object):
+                    all_objs.append((self.grid[i][j], j, i))
+        
+        return all_objs

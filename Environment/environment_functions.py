@@ -17,16 +17,17 @@ def headless_loop():
 
 
 def timestep(grid):
-    # Temporary test code testing spawn_foods
+    # Runs a full timestep of the 
 
     spawn_foods(grid)
-    print("*******************************************************************")
-    for i in range(grid.num_rows):
-        for j in range(grid.num_columns):
-            if grid.object_exists_at(j, i):
-                print(f"Food exists at ({j}, {i})")
-                print(f"Object is {grid.grid[i][j].__class__}")
-    print("*******************************************************************\n")
+    all_objs = grid.get_all_objects()
+    for obj_info in all_objs:
+        obj_info[0].update_location(obj_info[1], obj_info[2])
+        obj_info[0].count_timestep()
+        if isinstance(obj_info[0], obj.Food):
+            value = obj_info[0].calculate_current_value()
+            if value < -1:
+                grid.remove_object(obj_info[1], obj_info[2])
 
 
 def spawn_foods(grid):
