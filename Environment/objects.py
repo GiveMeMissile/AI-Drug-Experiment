@@ -62,17 +62,22 @@ class AI_Agent(Object):
     def __init__(self, x, y, grid):
         super().__init__(x, y, ec.AGENT_DECAY , 1)
         self.grid = grid
+        self.manager = None
 
     def count_timestep(self):
         super().count_timestep()
         self.initial_value -= self.rate_of_decay
 
-    def move(self):
+    def set_manager(self, manager):
+        self.manager = manager
+
+    def move(self, objs):
         # Moves the AI to a different location
 
         # Simulates AI choice
-        direction = [random.random(), random.random(), random.random(), random.random()]
-        value = direction.index(max(direction))
+        # direction = [random.random(), random.random(), random.random(), random.random()]
+        q_values = self.manager.get_q_values(objs)
+        value = q_values.index(max(q_values))
         old_x = self.x
         old_y = self.y
         if value == 0:
