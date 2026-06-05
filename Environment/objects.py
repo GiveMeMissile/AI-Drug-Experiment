@@ -36,10 +36,9 @@ class Object:
 
         return 0
     
-    def get_object_effects(self):
+    def apply_effect(self, obj):
         # Function to be overridden by other Objects
-
-        pass
+        return 0
 
 class Food(Object):
     
@@ -51,10 +50,10 @@ class Food(Object):
 
         return self.initial_value - self.rate_of_decay*self.num_timesteps
     
-    def get_object_effects(self):
+    def apply_effect(self, obj):
         # Gets the effects of what happens when the AI_Agent object comes into contact with the food.
         # This has yet to be set up.
-        return 0
+        obj.initial_value += self.initial_value/2
 
 
 class AI_Agent(Object):

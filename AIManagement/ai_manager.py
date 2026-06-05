@@ -39,7 +39,6 @@ class AIManager:
         input_tensor = self.create_input(objects)
 
         q_values = self.policy_model(input_tensor)
-        print(q_values)
         q_values = q_values.detach().tolist()
         return q_values
 

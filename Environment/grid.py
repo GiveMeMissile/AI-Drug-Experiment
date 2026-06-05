@@ -59,8 +59,14 @@ class Grid:
         new_x, new_y = self.adjust_positions(old_x, old_y)
         if (not new_x == old_x) or (not new_y == old_y):
             return False
-        
+
+
         obj = self.grid[old_y][old_x]
+
+        if self.object_exists_at(x, y):
+            x, y = self.adjust_positions(x, y)
+            self.grid[y][x].apply_effect(obj)
+
         self.remove_object(old_x, old_y)
         self.add_object(x, y, obj)
 
