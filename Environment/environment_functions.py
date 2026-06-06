@@ -41,9 +41,9 @@ def timestep(grid):
                 grid.remove_object(obj_info[1], obj_info[2])
 
         if isinstance(obj_info[0], obj.AI_Agent):
-            if obj_info[0].initial_value < 0:
-                grid.remove_object(obj_info[1], obj_info[2])
             obj_info[0].move(only_obj)
+            if obj_info[0].initial_value < 0:
+                grid.remove_object(obj_info[0].x, obj_info[0].y)
 
 
 def spawn_foods(grid):

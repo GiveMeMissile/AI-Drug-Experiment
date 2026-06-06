@@ -1,5 +1,3 @@
-import pygame
-
 WINDOW_X = 1000
 WINDOW_Y = 600
 GRID_THICKNESS = 5

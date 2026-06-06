@@ -1,4 +1,5 @@
 from Environment import environmental_constants as ec
+from AIManagement import hyperparameters as hp
 import random
 
 class Object:
@@ -58,10 +59,11 @@ class Food(Object):
 
 class AI_Agent(Object):
     
-    def __init__(self, x, y, grid):
+    def __init__(self, x, y, grid, epsilon):
         super().__init__(x, y, ec.AGENT_DECAY , 1)
         self.grid = grid
         self.manager = None
+        self.epsilon = epsilon
 
     def count_timestep(self):
         super().count_timestep()
@@ -70,15 +72,23 @@ class AI_Agent(Object):
     def set_manager(self, manager):
         self.manager = manager
 
+    def reset(self):
+        self.initial_value = 1
+        self.epsilon -= hp.EPSILON_DECAY
+
     def move(self, objs):
         # Moves the AI to a different location
 
-        # Simulates AI choice
-        # direction = [random.random(), random.random(), random.random(), random.random()]
-        q_values = self.manager.get_q_values(objs)
-        value = q_values.index(max(q_values))
+
+        value = None
+        if self.epsilon > random.randon():
+            value = random.randing(0, 3)
+        q_values = self.manager.get_q_values(objs, action=value)
+        if value is None:
+            value = q_values.index(max(q_values))
         old_x = self.x
         old_y = self.y
+
         if value == 0:
             self.y += 1
         elif value == 1:
