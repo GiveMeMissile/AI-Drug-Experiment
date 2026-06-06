@@ -1,19 +1,25 @@
-import Environment.environmental_constants as ev
-import AIManagement.neural_networks as nns
+import Environment.environmental_constants as ec
+from AIManagement.ai_manager import AIManager
 from Environment import objects as obj
 from Environment.grid import Grid
 import random
 
 
 def headless_loop():
-    grid = Grid(ev.NUM_ROWS, ev.NUM_COLUMNS)
+    grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
+    agent = obj.AI_Agent(10, 10, grid)
+    grid.add_object(10, 10, agent)
+    ai_manager = AIManager(agent)
+    agent.set_manager(ai_manager)
 
-    # More Test code
-    while True:
+    num_time_steps = 0
+    while num_time_steps < ec.MAX_TIME_STEPS:
         timestep(grid)
-        end = input("Type NO to stop: ")
-        if end == "NO":
+        if agent.initial_value < 0:
             break
+        num_time_steps += 1
+    
+    print("END")
 
 
 def timestep(grid):
@@ -43,7 +49,7 @@ def timestep(grid):
 def spawn_foods(grid):
     # Has a 1/4 chance to spawn a food object for every object which does not exist
 
-    max_spawn = ev.MAX_NUM_OBJECTS - grid.num_objects
+    max_spawn = ec.MAX_NUM_OBJECTS - grid.num_objects
     for _ in range(max_spawn):
         if (random.choice([True, True, True, False])):
             continue

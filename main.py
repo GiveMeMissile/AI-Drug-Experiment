@@ -3,7 +3,7 @@ from Visualization import visual_constants as vc
 from Environment.environment_functions import headless_loop
 import pygame
 
-HEADLESS = False
+HEADLESS = True
 
 if __name__ == "__main__":
     if not HEADLESS:
