@@ -1,11 +1,17 @@
 from AIManagement.data_tracker import TrainingData
+from AIManagement.ai_functions import get_lowest
 from AIManagement import neural_networks as nns
 from AIManagement import hyperparameters as hp
 from Environment.objects import AI_Agent
 import torch.nn.functional as f
 import torch
+import json
 
 class AIManager:
+
+    info = {}
+    model_number = -1
+    epsilon = 1
 
     def __init__(self, agent):
         self.agent = agent
@@ -114,5 +120,38 @@ class AIManager:
         self.optimizer.step()
 
         return loss.detach()
+    
+    def find_model(self):
+        # Finds a model to be loaded
+
+        with open(hp.MODEL_INFO) as f:
+            self.info = json.load(f)
+        
+        for i in range(len(self.info["model number"])):
+            if (self.info["hidden"][i] == hp.HIDDEN_SIZE and self.info["layers"][i] == hp.NUM_LAYERS and self.info["input"][i] == hp.INPUT_SIZE):
+                self.model_number = self.info["model number"][i]
+                self.epsilon = self.info["epsilon"][i]
+                break
+
+    def load_model(self):
+        # Loads a saved model from the saved models based off of the current hyperparams
+
+        self.find_model()
+        if self.model_number == -1:
+            return
+        
+        self.policy_model.load_state_dict(torch.load(hp.MODEL_DIR + "_" + str(self.model_number) + ".pth"))
+
+    def save_model(self):
+        if self.model_number == -1:
+            self.model_number = get_lowest(self.info["model number"])
+            self.info["model number"].append(self.model_number)
+            self.info["LSTM"].append(False)  # Temporary
+            self.info["hidden"].append(hp.HIDDEN_SIZE)
+            self.info["layers"].append(hp.NUM_LAYERS)
+            self.info["input"].append(hp.INPUT_SIZE)
+            self.info["epsilon"].append(self.epsilon)
+
+        torch.save(self.policy_model.state_dict(), hp.MODEL_DIR + "_" + str(self.model_number) + ".pth")
         
 
