@@ -59,18 +59,15 @@ class Food(Object):
 
 class AI_Agent(Object):
     
-    def __init__(self, x, y, grid, epsilon):
-        super().__init__(x, y, ec.AGENT_DECAY , 1)
+    def __init__(self, x, y, grid, manager):
+        super().__init__(x, y, ec.AGENT_DECAY, 1)
         self.grid = grid
-        self.manager = None
-        self.epsilon = epsilon
+        self.manager = manager
+        self.epsilon = manager.epsilon
 
     def count_timestep(self):
         super().count_timestep()
         self.initial_value -= self.rate_of_decay
-
-    def set_manager(self, manager):
-        self.manager = manager
 
     def reset(self):
         self.initial_value = 1
@@ -81,8 +78,8 @@ class AI_Agent(Object):
 
 
         value = None
-        if self.epsilon > random.randon():
-            value = random.randing(0, 3)
+        if self.epsilon > random.random():
+            value = random.randint(0, 3)
         q_values = self.manager.get_q_values(objs, action=value)
         if value is None:
             value = q_values.index(max(q_values))
@@ -105,6 +102,12 @@ class AI_Agent(Object):
     
     def get_red(self):
         return 255
+    
+    def get_green(self):
+        # Calculates amount of green of the rgb based on the object's variables.
+
+        g = 255/2 + (self.initial_value)*(255/2)
+        return g
     
 
 class Drug(Object):

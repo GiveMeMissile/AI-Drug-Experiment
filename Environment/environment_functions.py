@@ -5,12 +5,11 @@ from Environment.grid import Grid
 import random
 
 
-def headless_loop():
+def headless_loop(ai_manager, train):
     grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
-    agent = obj.AI_Agent(10, 10, grid)
+    agent = obj.AI_Agent(10, 10, grid, ai_manager)
     grid.add_object(10, 10, agent)
-    ai_manager = AIManager(agent)
-    agent.set_manager(ai_manager)
+    ai_manager.set_agent(agent)
 
     num_time_steps = 0
     while num_time_steps < ec.MAX_TIME_STEPS:
@@ -18,6 +17,11 @@ def headless_loop():
         if agent.initial_value < 0:
             break
         num_time_steps += 1
+
+        if train:
+            ai_manager.train()
+        if ai_manager.ended:
+            break
     
     print("END")
 
@@ -42,8 +46,9 @@ def timestep(grid):
 
         if isinstance(obj_info[0], obj.AI_Agent):
             obj_info[0].move(only_obj)
-            if obj_info[0].initial_value < 0:
+            if obj_info[0].initial_value < -1:
                 grid.remove_object(obj_info[0].x, obj_info[0].y)
+            print(f"Initial Value: {obj_info[0].initial_value}  |  Red: {obj_info[0].get_red()}  |  Green: {obj_info[0].get_green()}  |  Blue: {obj_info[0].get_blue()}")
 
 
 def spawn_foods(grid):

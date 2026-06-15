@@ -3,7 +3,7 @@ from AIManagement.ai_functions import get_lowest
 from AIManagement import neural_networks as nns
 from AIManagement import hyperparameters as hp
 from Environment.objects import AI_Agent
-import torch.nn.functional as f
+from torch import nn
 import torch
 import json
 
@@ -13,17 +13,18 @@ class AIManager:
     model_number = -1
     epsilon = 1
 
-    def __init__(self, agent):
-        self.agent = agent
+    def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.ended = False
 
         # Load models
         self.policy_model = nns.SimpleNN().to(self.device)
+        self.load_model()
         self.target_model = nns.SimpleNN().to(self.device)
         self.target_model.load_state_dict(self.policy_model.state_dict())
 
         self.optimizer = torch.optim.Adam(self.policy_model.parameters(), hp.LEARNING_RATE)
-        self.loss_fn = f.smooth_l1_loss()
+        self.loss_fn = nn.SmoothL1Loss()
 
         # Important Data
         self.previous_state = None
@@ -31,6 +32,14 @@ class AIManager:
 
         # Data saving
         self.training_data = TrainingData(5)
+
+    def set_agent(self, agent):
+        self.agent = agent
+        
+    def end_loop(self):
+        self.epsilon -= hp.EPSILON_DECAY
+        self.agent = None
+        self.ended = False
 
     def create_input(self, objects):
         input_list = [len(objects) - 1, self.agent.x, self.agent.y, self.agent.initial_value]
@@ -55,7 +64,6 @@ class AIManager:
         # Calculates the reward of the AI.
 
         reward = self.agent.initial_value
-        reward = 2*(reward - 0.5)
         return reward
     
     def save_data(self, current_state):
@@ -64,8 +72,9 @@ class AIManager:
             return
 
         ended = False
-        if self.agent.initial_value < 0:
+        if self.agent.initial_value < -1:
             ended = True
+            self.ended = True
         
         self.training_data.save_data(
             self.previous_state,
@@ -143,6 +152,8 @@ class AIManager:
         self.policy_model.load_state_dict(torch.load(hp.MODEL_DIR + "_" + str(self.model_number) + ".pth"))
 
     def save_model(self):
+        # Saves the AI model a file as well as its metadata in the info filw
+
         if self.model_number == -1:
             self.model_number = get_lowest(self.info["model number"])
             self.info["model number"].append(self.model_number)
@@ -151,7 +162,15 @@ class AIManager:
             self.info["layers"].append(hp.NUM_LAYERS)
             self.info["input"].append(hp.INPUT_SIZE)
             self.info["epsilon"].append(self.epsilon)
+        else:
+            idx = -1
+            for i in range(len(self.info["model_number"])):
+                if self.info["model_number"][i] == self.model_number:
+                    idx = i
+                    break
+            self.info["epsilon"][idx] = self.epsilon
+
+        with open(hp.MODEL_INFO, "w") as f:
+            json.dump(self.info, f)
 
         torch.save(self.policy_model.state_dict(), hp.MODEL_DIR + "_" + str(self.model_number) + ".pth")
-        
-

@@ -19,7 +19,7 @@ class SimpleNN(nn.Module):
                     nn.ReLU(),
                     nn.Linear(in_features=hidden_size, out_features=hidden_size)
                 ) for _ in range(num_layers)
-            ] 
+            ]
         )
         self.output_layer = nn.Linear(hidden_size, output_size)
 

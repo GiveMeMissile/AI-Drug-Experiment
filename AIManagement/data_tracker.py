@@ -9,7 +9,7 @@ class TrainingData:
         self.episodes.append(self.current_episode)
 
     def save_data(self, old_state, action, new_state, reward, ended):
-        self.current_episode.append(old_state, action, new_state, reward, ended)
+        self.current_episode.append((old_state, action, new_state, reward, ended))
 
     def get_valid_episodes(self, num_episodes, size):
         episodes = random.shuffle(list(self.episodes))

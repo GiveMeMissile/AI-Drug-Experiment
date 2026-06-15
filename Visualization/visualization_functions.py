@@ -8,18 +8,20 @@ from Environment.grid import Grid
 import pygame
 
 
-def visual_loop(window):
+def visual_loop(window, ai_manager, train):
+    # Runs the visuals for the Project
+
     pygame.init()
     running = True
     clock = pygame.time.Clock()
     visual_grid = create_grid()
     grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
-    agent = AI_Agent(10, 10, grid)
-    manager = AIManager(agent)
-    agent.set_manager(manager)
+    agent = AI_Agent(10, 10, grid, ai_manager)
+    ai_manager.set_agent(agent)
 
     grid.add_object(10, 10, agent)
     delay = pygame.time.get_ticks()
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -38,15 +40,21 @@ def visual_loop(window):
                         visual_objects.remove(location)
                         actual_objects.remove(object)
                         break
-            
+                
             for location in visual_objects:
                 visual_grid[location[1]][location[0]].remove_display()
 
             for object in actual_objects:
                 visual_grid[object[2]][object[1]].set_display_square(object[0])
+            if train:
+                ai_manager.train()
+            if ai_manager.ended:
+                break
 
         draw(window, visual_grid)
         clock.tick(60)
+        
+    return not running
 
 
 def get_grid_objects(visual_grid):
