@@ -100,15 +100,22 @@ class AIManager:
         q_values = q_values.detach().tolist()
         return q_values
     
-    def train(self):
-        sample = self.training_data.get_sample()
+    def train(self, sample=None):
+        # Trains the simple NN based off of the saved data in the DataTracker().
+        # Note: The parameter sample is meant for testing purposes
+
+        # Check the data sample to ensure that it is not None
+        if sample is None:
+            sample = self.training_data.get_sample()
+        if sample is None:
+            return None
 
         # Organize sample data into batched seperate parts
         batch_size = len(sample)
         previous_states = torch.stack([sample[i][0] for i in range(batch_size)], dim=0)
-        actions = torch.tensor([sample[i][1] for i in range(batch_size)])
+        actions = torch.tensor([sample[i][1] for i in range(batch_size)]).to(self.device).unsqueeze(1)
         new_states = torch.stack([sample[i][2] for i in range(batch_size)], dim=0)
-        rewards = torch.tensor([sample[i][3] for i in range(batch_size)])
+        rewards = torch.tensor([sample[i][3] for i in range(batch_size)]).to(self.device)
         ended = [sample[i][4] for i in range(batch_size)]
 
         q_values = self.policy_model(previous_states)
@@ -121,8 +128,14 @@ class AIManager:
             else:
                 target = rewards
         
+        # print(f"Q Values: {q_values}")
+        # print(f"Actions: {actions}")
+        # print(f"Targets: {target}")
+
+        
         q_values = q_values.gather(1, actions)
-        loss = self.loss_fn(q_values, target)
+        # print(q_values)
+        loss = self.loss_fn(q_values, target.unsqueeze(1))
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -164,8 +177,8 @@ class AIManager:
             self.info["epsilon"].append(self.epsilon)
         else:
             idx = -1
-            for i in range(len(self.info["model_number"])):
-                if self.info["model_number"][i] == self.model_number:
+            for i in range(len(self.info["model number"])):
+                if self.info["model number"][i] == self.model_number:
                     idx = i
                     break
             self.info["epsilon"][idx] = self.epsilon

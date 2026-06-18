@@ -6,7 +6,7 @@ import pygame
 
 HEADLESS = False
 NUMBER_OF_LOOPS = 10
-TRAINING = False
+TRAINING = True
 
 if __name__ == "__main__":
     ai_manager = AIManager()

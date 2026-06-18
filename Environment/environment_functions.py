@@ -48,7 +48,7 @@ def timestep(grid):
             obj_info[0].move(only_obj)
             if obj_info[0].initial_value < -1:
                 grid.remove_object(obj_info[0].x, obj_info[0].y)
-            print(f"Initial Value: {obj_info[0].initial_value}  |  Red: {obj_info[0].get_red()}  |  Green: {obj_info[0].get_green()}  |  Blue: {obj_info[0].get_blue()}")
+            # print(f"Initial Value: {obj_info[0].initial_value}  |  Red: {obj_info[0].get_red()}  |  Green: {obj_info[0].get_green()}  |  Blue: {obj_info[0].get_blue()}")
 
 
 def spawn_foods(grid):
