@@ -29,5 +29,45 @@ def get_lowest(data):
     return max(data) + 1
 
 
-def train():
-    pass
+def kill_model(model_number):
+    # Used to remove an saved Model file and the JSON metadata attached to it
+    idx = -1
+    with open(hp.MODEL_INFO) as f:
+        model_info = json.load(f)
+
+    if len(model_info["model number"]) == 0:
+        return None
+
+    idx = get_idx_from_number(model_info, model_number, "model number")         
+
+    if idx == -1:
+        print(f"Model number {model_number} does not exist, please try a model number which actually exists.")
+        return None
+
+    model_file = hp.MODEL_DIR + "_" + str(model_number) + ".pth"
+    print(model_file)
+
+    if os.path.exists(model_file):
+        os.remove(model_file)
+    else:
+        print(f"Was unable to find model {model_number}\n")
+
+    model_info["model number"].pop(idx)
+    model_info["LSTM"].pop(idx)
+    model_info["hidden"].pop(idx)
+    model_info["layers"].pop(idx)
+    model_info["input"].pop(idx)
+    model_info["epsilon"].pop(idx)
+    with open(hp.MODEL_INFO, 'w') as f:
+        json.dump(model_info, f)
+        print("The model has been killed")
+
+
+def get_idx_from_number(data, number, name):
+    # Takes in a number from either ai or training metadata and uses it to locate the idx.
+
+    for i, part in enumerate(data[name]):
+        if part == number:
+            return i
+        
+    return -1

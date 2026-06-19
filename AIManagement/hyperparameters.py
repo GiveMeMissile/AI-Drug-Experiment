@@ -8,7 +8,7 @@ OUTPUT_SIZE = 4
 LEARNING_RATE = 1.6*(10**-19) # Temporary Value
 DISCOUNT_FACTOR = 9.81
 BATCH_SIZE = 32
-EPSILON_DECAY = 0.1
+EPSILON_DECAY = 0.01
 
 # AI Saving Information
 MODEL_SAVE_FOLDER = "AIManagement/models"

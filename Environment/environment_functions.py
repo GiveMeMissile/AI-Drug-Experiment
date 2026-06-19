@@ -7,8 +7,8 @@ import random
 
 def headless_loop(ai_manager, train):
     grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
-    agent = obj.AI_Agent(10, 10, grid, ai_manager)
-    grid.add_object(10, 10, agent)
+    agent = obj.AI_Agent(random.randint(0, ec.NUM_ROWS), random.randint(0, ec.NUM_COLUMNS), grid, ai_manager)
+    grid.add_object(random.randint(0, ec.NUM_ROWS), random.randint(0, ec.NUM_COLUMNS), agent)
     ai_manager.set_agent(agent)
 
     num_time_steps = 0

@@ -6,6 +6,7 @@ from Environment.objects import AI_Agent
 from Visualization import grid_object
 from Environment.grid import Grid
 import pygame
+import random
 
 
 def visual_loop(window, ai_manager, train):
@@ -16,10 +17,10 @@ def visual_loop(window, ai_manager, train):
     clock = pygame.time.Clock()
     visual_grid = create_grid()
     grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
-    agent = AI_Agent(10, 10, grid, ai_manager)
+    agent = AI_Agent(random.randint(0, ec.NUM_ROWS), random.randint(0, ec.NUM_COLUMNS), grid, ai_manager)
     ai_manager.set_agent(agent)
 
-    grid.add_object(10, 10, agent)
+    grid.add_object(random.randint(0, ec.NUM_ROWS), random.randint(0, ec.NUM_COLUMNS), agent)
     delay = pygame.time.get_ticks()
 
     while running:

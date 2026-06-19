@@ -128,13 +128,12 @@ class AIManager:
             else:
                 target = rewards
         
+        # Debug Code
         # print(f"Q Values: {q_values}")
         # print(f"Actions: {actions}")
         # print(f"Targets: {target}")
 
-        
         q_values = q_values.gather(1, actions)
-        # print(q_values)
         loss = self.loss_fn(q_values, target.unsqueeze(1))
 
         self.optimizer.zero_grad()

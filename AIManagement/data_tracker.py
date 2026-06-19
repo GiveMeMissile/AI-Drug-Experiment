@@ -36,7 +36,7 @@ class TrainingData:
     def get_sample(self, split_size=hp.BATCH_SIZE/16, batch_size=hp.BATCH_SIZE):
 
         if self.get_max() < hp.BATCH_SIZE:
-            print(self.get_max())
+            # print(self.get_max())
             return None
 
         episodes = self.get_valid_episodes(split_size, batch_size)
