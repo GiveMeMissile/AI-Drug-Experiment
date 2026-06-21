@@ -64,9 +64,34 @@ def kill_model(model_number):
     model_info["layers"].pop(idx)
     model_info["input"].pop(idx)
     model_info["epsilon"].pop(idx)
+    model_info["iteration"].pop(idx)
     with open(hp.MODEL_INFO, 'w') as f:
         json.dump(model_info, f)
         print("The model has been killed")
+
+
+def destroy_data(data):
+    # Removed data file and its corresponding info
+
+    with open(hp.DATA_SAVE_INFO, "r") as f:
+        info = json.load(f)
+    idx = -1
+    for i in range(len(info["save"])):
+        if info["save"][i] == data:
+            idx = i
+    if idx == -1:
+        return
+    filename = hp.DATA_SAVE_DIR + str(data) + ".pkl"
+    if os.path.exists(filename):
+        os.remove(filename)
+    else:
+        return
+    
+    info["save"].pop(idx)
+    info["model"].pop(idx)
+
+    with open(hp.DATA_SAVE_INFO, "w") as f:
+        json.dump(info, f)
 
 
 def get_idx_from_number(data, number, name):

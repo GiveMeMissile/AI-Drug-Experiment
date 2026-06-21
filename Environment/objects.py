@@ -56,6 +56,8 @@ class Food(Object):
         # Gets the effects of what happens when the AI_Agent object comes into contact with the food.
         
         obj.initial_value += self.calculate_current_value()
+        if obj.initial_value > 1:
+            obj.initial_value = 1
         obj.object_consumed = self
 
 

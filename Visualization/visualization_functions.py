@@ -40,13 +40,13 @@ def visual_loop(window, ai_manager, train):
             actual_objects = grid.get_all_objects()
             for location in visual_objects:
                 for object in actual_objects:
-                    if object[1] == location[0] and object[2] == location[1]:
+                    if object[0] is location[0] and object[1] == location[1] and object[2] == location[2]:
                         visual_objects.remove(location)
                         actual_objects.remove(object)
                         break
                 
             for location in visual_objects:
-                visual_grid[location[1]][location[0]].remove_display()
+                visual_grid[location[2]][location[1]].remove_display()
 
             for object in actual_objects:
                 visual_grid[object[2]][object[1]].set_display_square(object[0])
@@ -67,7 +67,7 @@ def get_grid_objects(visual_grid):
     for i in range(len(visual_grid)):
         for j in range(len(visual_grid[i])):
             if visual_grid[i][j].display_square is not None:
-                locations.append((j, i))
+                locations.append((visual_grid[i][j].display_obj, j, i))
     
     return locations
 

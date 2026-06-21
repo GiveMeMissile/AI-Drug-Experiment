@@ -1,15 +1,19 @@
 from Visualization.visualization_functions import visual_loop
 from Environment.environment_functions import headless_loop
+from AIManagement.ai_functions import check_for_folder
 from Visualization import visual_constants as vc
 from AIManagement.ai_manager import AIManager
 import pygame
 
-HEADLESS = True
+# Important settings
+HEADLESS = False
 NUMBER_OF_LOOPS = 120
-TRAINING = True
+TRAINING = False
+ITERATION = 4  # Testing lol
 
 if __name__ == "__main__":
-    ai_manager = AIManager()
+    check_for_folder()
+    ai_manager = AIManager(ITERATION)
 
     for i in range(NUMBER_OF_LOOPS):
 

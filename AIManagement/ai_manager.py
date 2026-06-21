@@ -13,9 +13,10 @@ class AIManager:
     model_number = -1
     epsilon = 1
 
-    def __init__(self):
+    def __init__(self, iteration):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.ended = False
+        self.iteration = iteration
 
         # Load models
         self.policy_model = nns.SimpleNN().to(self.device)
@@ -171,7 +172,8 @@ class AIManager:
             self.info = json.load(f)
         
         for i in range(len(self.info["model number"])):
-            if (self.info["hidden"][i] == hp.HIDDEN_SIZE and self.info["layers"][i] == hp.NUM_LAYERS and self.info["input"][i] == hp.INPUT_SIZE):
+            if (self.info["hidden"][i] == hp.HIDDEN_SIZE and self.info["layers"][i] == hp.NUM_LAYERS and 
+                self.info["input"][i] == hp.INPUT_SIZE and self.info["iteration"][i] == self.iteration):
                 self.model_number = self.info["model number"][i]
                 self.epsilon = self.info["epsilon"][i]
                 break
@@ -184,8 +186,9 @@ class AIManager:
 
         self.find_model()
         if self.model_number == -1:
+            print("Creating a new Model")
             return
-        
+        print(f"Loading Model #{self.model_number}")
         self.policy_model.load_state_dict(torch.load(hp.MODEL_DIR + "_" + str(self.model_number) + ".pth"))
 
     def save_model(self):
@@ -199,6 +202,7 @@ class AIManager:
             self.info["layers"].append(hp.NUM_LAYERS)
             self.info["input"].append(hp.INPUT_SIZE)
             self.info["epsilon"].append(self.epsilon)
+            self.info["iteration"].append(self.iteration)
         else:
             idx = -1
             for i in range(len(self.info["model number"])):
