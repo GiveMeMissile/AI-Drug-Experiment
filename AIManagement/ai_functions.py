@@ -11,6 +11,12 @@ def check_for_folder():
         open(hp.MODEL_INFO, "x")
         with open(hp.MODEL_INFO, "w") as f:
             json.dump(hp.INFO_FORMAT, f)
+    if not os.path.exists(hp.DATA_SAVE_FOLDER):
+        os.mkdir(hp.DATA_SAVE_FOLDER)
+    if not os.path.exists(hp.DATA_SAVE_INFO):
+        open(hp.DATA_SAVE_INFO, "x")
+        with open(hp.DATA_SAVE_INFO, "w") as f:
+            json.dump(hp.SAVE_FORMAT, f)
 
 
 def get_lowest(data):

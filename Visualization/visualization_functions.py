@@ -1,7 +1,6 @@
 from Environment.environment_functions import timestep
 from Environment import environmental_constants as ec
 from Visualization import visual_constants as vc
-from AIManagement.ai_manager import AIManager
 from Environment.objects import AI_Agent
 from Visualization import grid_object
 from Environment.grid import Grid
@@ -17,11 +16,12 @@ def visual_loop(window, ai_manager, train):
     clock = pygame.time.Clock()
     visual_grid = create_grid()
     grid = Grid(ec.NUM_ROWS, ec.NUM_COLUMNS)
-    agent = AI_Agent(random.randint(0, ec.NUM_ROWS), random.randint(0, ec.NUM_COLUMNS), grid, ai_manager)
+    agent = AI_Agent(random.randint(0, ec.NUM_COLUMNS), random.randint(0, ec.NUM_ROWS), grid, ai_manager)
     ai_manager.set_agent(agent)
 
-    grid.add_object(random.randint(0, ec.NUM_ROWS), random.randint(0, ec.NUM_COLUMNS), agent)
+    grid.add_object(random.randint(0, ec.NUM_COLUMNS), random.randint(0, ec.NUM_ROWS), agent)
     delay = pygame.time.get_ticks()
+    steps = 0
 
     while running:
         for event in pygame.event.get():
@@ -31,6 +31,9 @@ def visual_loop(window, ai_manager, train):
         if pygame.time.get_ticks() - delay >= vc.TIME_PER_TIMESTEP:           
             delay = pygame.time.get_ticks()
             timestep(grid)
+            steps += 1
+            if steps % ec.STEPS_TILL_SYNC == 0:
+                ai_manager.sync_model()
 
             # Connecting what is on the real grid to the visual grid
             visual_objects = get_grid_objects(visual_grid)
@@ -49,6 +52,7 @@ def visual_loop(window, ai_manager, train):
                 visual_grid[object[2]][object[1]].set_display_square(object[0])
             if train:
                 ai_manager.train()
+            ai_manager.track_data()
             if ai_manager.ended:
                 break
 

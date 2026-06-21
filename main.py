@@ -4,9 +4,9 @@ from Visualization import visual_constants as vc
 from AIManagement.ai_manager import AIManager
 import pygame
 
-HEADLESS = False
-NUMBER_OF_LOOPS = 10
-TRAINING = False
+HEADLESS = True
+NUMBER_OF_LOOPS = 120
+TRAINING = True
 
 if __name__ == "__main__":
     ai_manager = AIManager()
@@ -23,3 +23,4 @@ if __name__ == "__main__":
         ai_manager.end_loop()
     
     ai_manager.save_model()
+    ai_manager.save_tracking_data()

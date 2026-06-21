@@ -10,6 +10,7 @@ class Object:
         self.rate_of_decay = rate_of_decay
         self.initial_value = initial_value
         self.num_timesteps = 0
+        self.contacted_object = False
     
     def update_location(self, x, y):
         self.x = x
@@ -53,8 +54,9 @@ class Food(Object):
     
     def apply_effect(self, obj):
         # Gets the effects of what happens when the AI_Agent object comes into contact with the food.
-        # This has yet to be set up.
-        obj.initial_value += self.initial_value/2
+        
+        obj.initial_value += self.calculate_current_value()
+        obj.object_consumed = self
 
 
 class AI_Agent(Object):
@@ -64,6 +66,7 @@ class AI_Agent(Object):
         self.grid = grid
         self.manager = manager
         self.epsilon = manager.epsilon
+        self.object_consumed = None
 
     def count_timestep(self):
         super().count_timestep()
@@ -75,7 +78,6 @@ class AI_Agent(Object):
 
     def move(self, objs):
         # Moves the AI to a different location
-
 
         value = None
         if self.epsilon > random.random():
@@ -94,7 +96,8 @@ class AI_Agent(Object):
             self.x += 1
         elif value == 3:
             self.x -= 1
-
+            
+        self.object_consumed = None
         self.grid.move_object(old_x, old_y, self.x, self.y)
     
     def get_blue(self):

@@ -1,4 +1,4 @@
-from AIManagement.data_tracker import TrainingData
+from AIManagement.data_tracker import TrainingData, DataMonitor
 from AIManagement.ai_functions import get_lowest
 from AIManagement import neural_networks as nns
 from AIManagement import hyperparameters as hp
@@ -29,17 +29,28 @@ class AIManager:
         # Important Data
         self.previous_state = None
         self.action = None
+        self.step = 0
+        self.q_values = None
+        self.loss = None
+        self.contacted_obj = False
+        self.reward = None
 
         # Data saving
-        self.training_data = TrainingData(5)
+        self.training_data = TrainingData(hp.MAX_SAVED_EPISODES)
+        self.tracking_data = DataMonitor(self.model_number)
 
     def set_agent(self, agent):
         self.agent = agent
+
+    def sync_model(self):
+        self.target_model.load_state_dict(self.policy_model.state_dict())
         
     def end_loop(self):
         self.epsilon -= hp.EPSILON_DECAY
         self.agent = None
         self.ended = False
+        self.training_data.new_episode()
+        self.tracking_data.new_episode()
 
     def create_input(self, objects):
         input_list = [len(objects) - 1, self.agent.x, self.agent.y, self.agent.initial_value]
@@ -64,6 +75,14 @@ class AIManager:
         # Calculates the reward of the AI.
 
         reward = self.agent.initial_value
+
+        # Bonus for consuming an object
+        if self.agent.object_consumed is not None:
+            self.contacted_obj = True
+            reward += self.agent.object_consumed.calculate_current_value()
+        else:
+            self.contacted_obj = False
+        self.reward = reward
         return reward
     
     def save_data(self, current_state):
@@ -98,6 +117,8 @@ class AIManager:
             self.action = action
 
         q_values = q_values.detach().tolist()
+        self.q_values = q_values
+        self.step += 1
         return q_values
     
     def train(self, sample=None):
@@ -139,8 +160,9 @@ class AIManager:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        self.loss = loss.detach().item()
 
-        return loss.detach()
+        return self.loss
     
     def find_model(self):
         # Finds a model to be loaded
@@ -153,6 +175,9 @@ class AIManager:
                 self.model_number = self.info["model number"][i]
                 self.epsilon = self.info["epsilon"][i]
                 break
+
+    def track_data(self):
+        self.tracking_data.add_data(self.step, self.q_values, self.action, self.reward, self.contacted_obj, self.loss)
 
     def load_model(self):
         # Loads a saved model from the saved models based off of the current hyperparams
@@ -186,3 +211,6 @@ class AIManager:
             json.dump(self.info, f)
 
         torch.save(self.policy_model.state_dict(), hp.MODEL_DIR + "_" + str(self.model_number) + ".pth")
+
+    def save_tracking_data(self):
+        self.tracking_data.save_data(self.model_number)

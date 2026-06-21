@@ -15,3 +15,12 @@ MODEL_SAVE_FOLDER = "AIManagement/models"
 MODEL_INFO = MODEL_SAVE_FOLDER + "/model_info.json"
 MODEL_DIR = MODEL_SAVE_FOLDER + "/model"
 INFO_FORMAT = {"model number": [], "LSTM": [], "hidden": [], "layers": [], "input": [], "epsilon": []}
+
+# Progress Tracking Info
+DATA_SAVE_FOLDER = "AIManagement/progress"
+DATA_SAVE_DIR = DATA_SAVE_FOLDER + "/save_"
+DATA_SAVE_INFO = DATA_SAVE_FOLDER + "/save_info.json"
+SAVE_FORMAT = {"save": [], "model": []}
+
+# Other Constants
+MAX_SAVED_EPISODES = 10
