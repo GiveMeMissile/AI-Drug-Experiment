@@ -31,7 +31,7 @@ class Object:
     def get_blue(self):
         # Calculates the amount of blue of the rgb based on the object's variables.
 
-        b = (1 - 5*(self.rate_of_decay))*(255)
+        b = (1 - 10*(self.rate_of_decay))*(255)
         return b
     
     def get_red(self):

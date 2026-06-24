@@ -14,15 +14,22 @@ class AIManager:
     model_number = -1
     epsilon = 1
 
-    def __init__(self, iteration):
+    def __init__(self, iteration, lstm=False):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.ended = False
         self.iteration = iteration
+        self.lstm = lstm
 
         # Load models
-        self.policy_model = nns.SimpleNN().to(self.device)
+        if lstm:
+            self.policy_model = nns.LSTM().to(self.device)
+        else:
+            self.policy_model = nns.SimpleNN().to(self.device)
         self.load_model()
-        self.target_model = nns.SimpleNN().to(self.device)
+        if lstm:
+            self.target_model = nns.LSTM().to(self.device)
+        else:
+            self.target_model = nns.SimpleNN().to(self.device)
         self.target_model.load_state_dict(self.policy_model.state_dict())
 
         self.optimizer = torch.optim.Adam(self.policy_model.parameters(), hp.LEARNING_RATE)
@@ -149,7 +156,13 @@ class AIManager:
         self.step += 1
         return q_values
     
-    def train(self, sample=None):
+    def train(self):
+        if self.lstm:
+            self.sequence_train
+        else:
+            self.simple_train
+    
+    def simple_train(self, sample=None):
         # Trains the simple NN based off of the saved data in the DataTracker().
         # Note: The parameter sample is meant for testing purposes
 
@@ -201,10 +214,14 @@ class AIManager:
         
         for i in range(len(self.info["model number"])):
             if (self.info["hidden"][i] == hp.HIDDEN_SIZE and self.info["layers"][i] == hp.NUM_LAYERS and 
-                self.info["input"][i] == hp.INPUT_SIZE and self.info["iteration"][i] == self.iteration):
+                self.info["input"][i] == hp.INPUT_SIZE and self.info["iteration"][i] == self.iteration 
+                and self.info["LSTM"][i] == self.lstm):
                 self.model_number = self.info["model number"][i]
                 self.epsilon = self.info["epsilon"][i]
                 break
+
+    def sequence_train():
+        pass
 
     def track_data(self):
         self.tracking_data.add_data(self.step, self.q_values, self.action, self.reward, self.contacted_obj, self.loss)
@@ -225,7 +242,7 @@ class AIManager:
         if self.model_number == -1:
             self.model_number = get_lowest(self.info["model number"])
             self.info["model number"].append(self.model_number)
-            self.info["LSTM"].append(False)  # Temporary
+            self.info["LSTM"].append(self.lstm)
             self.info["hidden"].append(hp.HIDDEN_SIZE)
             self.info["layers"].append(hp.NUM_LAYERS)
             self.info["input"].append(hp.INPUT_SIZE)

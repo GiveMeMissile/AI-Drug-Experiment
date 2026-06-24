@@ -20,11 +20,12 @@ import pygame
 HEADLESS = False
 NUMBER_OF_LOOPS = 120
 TRAINING = False
-ITERATION = 20 # Testing lol
+ITERATION = 1 # Testing lol
+IS_LSTM = False
 
 if __name__ == "__main__":
     check_for_folder()
-    ai_manager = AIManager(ITERATION)
+    ai_manager = AIManager(ITERATION, IS_LSTM)
 
     num_loops = 0
 
