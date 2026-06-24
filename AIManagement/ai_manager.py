@@ -6,6 +6,7 @@ from Environment.objects import AI_Agent
 from torch import nn
 import torch
 import json
+import math
 
 class AIManager:
 
@@ -53,29 +54,51 @@ class AIManager:
         self.training_data.new_episode()
         self.tracking_data.new_episode()
 
+    def order_objects(self, objs):
+        # Orders the list of objects based on their distance from the AI
+
+        order_list = []
+        for i, obj in enumerate(objs):
+            a = math.sqrt((obj[0])**2 + (obj[1])**2)
+            order_list.append((a, i))
+        order_list.sort(key=lambda x: x[0])
+        ordered_list = []
+        for part in order_list:
+            ordered_list.append(objs[part[1]])
+        return ordered_list
+
     def create_input(self, objects):
         input_list = [len(objects) - 1, self.agent.x, self.agent.y, self.agent.initial_value]
+
+        obj_list = []
 
         # Add all objects to the input
         for obj in objects:
             if isinstance(obj, AI_Agent):
                 continue
-            input_list.append(obj.x)
-            input_list.append(obj.y)
-            input_list.append(obj.initial_value)
-            input_list.append(obj.rate_of_decay)
-            input_list.append(obj.num_timesteps)
+            a = []
+            a.append(obj.x - self.agent.x)
+            a.append(obj.y - self.agent.y)
+            a.append(obj.initial_value)
+            a.append(obj.rate_of_decay)
+            obj_list.append(a)
+            a.append(obj.num_timesteps)
 
-        # Add padding values for non existant objects (padding = -1)
+        ordered_objects = self.order_objects(obj_list)
+        # ordered_objects = obj_list
+        for obj in ordered_objects:
+            input_list += obj
+
+        # Add padding values for non existant objects (padding = 0)
         for _ in range(hp.INPUT_SIZE - len(input_list)):
-            input_list.append(-1)
+            input_list.append(0)
 
         return torch.tensor(input_list).to(self.device)
     
     def calculate_reward(self):
         # Calculates the reward of the AI.
 
-        reward = self.agent.initial_value
+        reward = ((2*self.agent.initial_value)**2) * self.agent.initial_value/abs(self.agent.initial_value)
 
         # Bonus for consuming an object
         if self.agent.object_consumed is not None:
@@ -83,6 +106,10 @@ class AIManager:
             reward += self.agent.object_consumed.calculate_current_value()
         else:
             self.contacted_obj = False
+
+        if self.agent.wall:
+            reward -= 2
+
         self.reward = reward
         return reward
     
@@ -92,7 +119,7 @@ class AIManager:
             return
 
         ended = False
-        if self.agent.initial_value < -1:
+        if self.agent.initial_value <= -1:
             ended = True
             self.ended = True
         
@@ -113,7 +140,7 @@ class AIManager:
         q_values = self.policy_model(input_tensor)
 
         if action is None:
-            self.action = q_values.argmax()
+            self.action = q_values.argmax().detach().item()
         else:
             self.action = action
 
@@ -127,6 +154,7 @@ class AIManager:
         # Note: The parameter sample is meant for testing purposes
 
         # Check the data sample to ensure that it is not None
+        self.loss = None
         if sample is None:
             sample = self.training_data.get_sample()
         if sample is None:

@@ -14,7 +14,7 @@ def headless_loop(ai_manager, train):
     num_time_steps = 0
     while num_time_steps < ec.MAX_TIME_STEPS:
         timestep(grid)
-        if agent.initial_value < 0:
+        if agent.initial_value < -1:
             break
         num_time_steps += 1
         if num_time_steps % ec.STEPS_TILL_SYNC == 0:
@@ -23,10 +23,8 @@ def headless_loop(ai_manager, train):
         if train:
             ai_manager.train()
         ai_manager.track_data()
-        if ai_manager.ended:
+        if agent.initial_value <= -1:
             break
-    
-    print("END")
 
 
 def timestep(grid):
@@ -66,6 +64,6 @@ def spawn_foods(grid):
             y = random.randint(0, grid.num_rows - 1)
             if grid.object_exists_at(x, y):
                 continue
-            grid.add_object(x, y, obj.Food(x, y))
+            grid.add_object(x, y, obj.Food(x, y, random.randint(ec.MIN_DECAY, ec.MAX_DECAY)/100, random.randint(ec.MIN_INITIAL, ec.MAX_INITIAL)/100))
             break
 

@@ -53,7 +53,7 @@ def visual_loop(window, ai_manager, train):
             if train:
                 ai_manager.train()
             ai_manager.track_data()
-            if ai_manager.ended:
+            if agent.initial_value <= -1:
                 break
 
         draw(window, visual_grid)
