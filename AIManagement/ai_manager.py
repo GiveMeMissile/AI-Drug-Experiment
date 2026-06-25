@@ -8,6 +8,7 @@ import torch
 import json
 import math
 
+
 class AIManager:
 
     info = {}
@@ -19,6 +20,11 @@ class AIManager:
         self.ended = False
         self.iteration = iteration
         self.lstm = lstm
+
+        if lstm:
+            self.sequence_length = hp.SEQUENCE_LENGTH
+        else:
+            self.sequence_length = None
 
         # Load models
         if lstm:
@@ -43,6 +49,11 @@ class AIManager:
         self.loss = None
         self.contacted_obj = False
         self.reward = None
+
+        # LSTM_data
+        self.memory = torch.zeros(size=(hp.SEQUENCE_LENGTH, hp.INPUT_SIZE)).to(self.device)
+        self.h0 = None
+        self.c0 = None
 
         # Data saving
         self.training_data = TrainingData(hp.MAX_SAVED_EPISODES)
@@ -102,6 +113,12 @@ class AIManager:
 
         return torch.tensor(input_list).to(self.device)
     
+    def add_to_memory(self, tensor):
+        # Adds the input tensor to the front of the memory
+
+        self.memory = self.memory[:-1]
+        self.memory = torch.cat((tensor.unsqueeze(0), self.memory), dim=0)
+    
     def calculate_reward(self):
         # Calculates the reward of the AI.
 
@@ -141,10 +158,17 @@ class AIManager:
     def get_q_values(self, objects, action=None):
         input_tensor = self.create_input(objects)
 
-        self.save_data(input_tensor)
-        self.previous_state = input_tensor
 
-        q_values = self.policy_model(input_tensor)
+        if self.lstm:
+            self.add_to_memory(input_tensor)
+            self.save_data(self.memory)
+            self.previous_state = self.memory
+            q_values, self.h0, self.c0 = self.policy_model(self.memory.unsqueeze(0), self.device, self.h0, self.c0)
+            q_values = q_values.squeeze(0)[0]
+        else:
+            self.save_data(input_tensor)
+            self.previous_state = input_tensor
+            q_values = self.policy_model(input_tensor)
 
         if action is None:
             self.action = q_values.argmax().detach().item()
@@ -213,9 +237,11 @@ class AIManager:
             self.info = json.load(f)
         
         for i in range(len(self.info["model number"])):
+
+            # The most vile if statement ever concieved by man
             if (self.info["hidden"][i] == hp.HIDDEN_SIZE and self.info["layers"][i] == hp.NUM_LAYERS and 
                 self.info["input"][i] == hp.INPUT_SIZE and self.info["iteration"][i] == self.iteration 
-                and self.info["LSTM"][i] == self.lstm):
+                and self.info["LSTM"][i] == self.lstm and self.info["sequence length"][i] == self.sequence_length):
                 self.model_number = self.info["model number"][i]
                 self.epsilon = self.info["epsilon"][i]
                 break
@@ -245,6 +271,7 @@ class AIManager:
             self.info["LSTM"].append(self.lstm)
             self.info["hidden"].append(hp.HIDDEN_SIZE)
             self.info["layers"].append(hp.NUM_LAYERS)
+            self.info["sequence length"].append(self.sequence_length)
             self.info["input"].append(hp.INPUT_SIZE)
             self.info["epsilon"].append(self.epsilon)
             self.info["iteration"].append(self.iteration)

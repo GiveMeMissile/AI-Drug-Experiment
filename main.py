@@ -25,7 +25,7 @@ IS_LSTM = False
 
 if __name__ == "__main__":
     check_for_folder()
-    ai_manager = AIManager(ITERATION, IS_LSTM)
+    ai_manager = AIManager(ITERATION, lstm=IS_LSTM)
 
     num_loops = 0
 

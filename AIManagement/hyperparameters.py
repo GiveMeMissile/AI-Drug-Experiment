@@ -9,12 +9,13 @@ LEARNING_RATE = 0.0001
 DISCOUNT_FACTOR = 0.95
 BATCH_SIZE = 32
 EPSILON_DECAY = 0.01
+SEQUENCE_LENGTH = 10
 
 # AI Saving Information
 MODEL_SAVE_FOLDER = "AIManagement/models"
 MODEL_INFO = MODEL_SAVE_FOLDER + "/model_info.json"
 MODEL_DIR = MODEL_SAVE_FOLDER + "/model"
-INFO_FORMAT = {"model number": [], "LSTM": [], "hidden": [], "layers": [], "input": [], "epsilon": [], "iteration": []}
+INFO_FORMAT = {"model number": [], "LSTM": [], "hidden": [], "layers": [], "sequence length": [], "input": [], "epsilon": [], "iteration": []}
 
 # Progress Tracking Info
 DATA_SAVE_FOLDER = "AIManagement/progress"
