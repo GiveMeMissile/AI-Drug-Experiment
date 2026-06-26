@@ -63,14 +63,20 @@ class AIManager:
         self.agent = agent
 
     def sync_model(self):
+        # Syncs the target model with the policy model
+
         self.target_model.load_state_dict(self.policy_model.state_dict())
         
     def end_loop(self):
+        # Resets variables after an episode has ended
+
         self.epsilon -= hp.EPSILON_DECAY
         self.agent = None
         self.ended = False
         self.training_data.new_episode()
         self.tracking_data.new_episode()
+        self.h0 = None
+        self.c0 = None
 
     def order_objects(self, objs):
         # Orders the list of objects based on their distance from the AI
@@ -86,6 +92,8 @@ class AIManager:
         return ordered_list
 
     def create_input(self, objects):
+        # Creates a tensor to be used as input for the AI
+
         input_list = [len(objects) - 1, self.agent.x, self.agent.y, self.agent.initial_value]
 
         obj_list = []
@@ -138,6 +146,7 @@ class AIManager:
         return reward
     
     def save_data(self, current_state):
+        # Saves data to be used for future training
 
         if self.previous_state is None:
             return
@@ -156,8 +165,9 @@ class AIManager:
         )
     
     def get_q_values(self, objects, action=None):
-        input_tensor = self.create_input(objects)
+        # Calculates the q values when the agent tries to move
 
+        input_tensor = self.create_input(objects)
 
         if self.lstm:
             self.add_to_memory(input_tensor)
@@ -182,13 +192,12 @@ class AIManager:
     
     def train(self):
         if self.lstm:
-            self.sequence_train
+            self.sequence_train()
         else:
-            self.simple_train
+            self.simple_train()
     
     def simple_train(self, sample=None):
         # Trains the simple NN based off of the saved data in the DataTracker().
-        # Note: The parameter sample is meant for testing purposes
 
         # Check the data sample to ensure that it is not None
         self.loss = None
@@ -230,6 +239,83 @@ class AIManager:
 
         return self.loss
     
+    def sequence_train(self, loops_till_backpropagation=5):
+        # Trains the policy model on a sequence of data.
+        # Used for training the LSTM to make usage of its memory cells.
+
+        sequences = self.training_data.get_sample_sequence()
+
+        if sequences is None:
+            return None
+        
+        # Get the batch size and sequence length
+        batch_size = len(sequences)
+        sequence_length = len(sequences[0])
+
+        # Set up LSTM memory cells
+        h0 = torch.zeros(self.policy_model.num_layers, batch_size, self.policy_model.hidden_size).to(self.device)
+        c0 = torch.zeros(self.policy_model.num_layers, batch_size, self.policy_model.hidden_size).to(self.device)
+
+        # Initilize important variables
+        total_loss = 0
+        accumulated_loss = 0
+        loops = 0
+
+        for s in range(sequence_length):
+
+            # Gets the batched values for the current part of the sequence, denoted by s
+            previous_states = torch.stack([sequences[b][s][0] for b in range(batch_size)], dim=0)
+            actions = torch.tensor([sequences[b][s][1] for b in range(batch_size)]).to(self.device).unsqueeze(1)
+            new_states = torch.stack([sequences[b][s][2] for b in range(batch_size)], dim=0)
+            rewards = torch.tensor([sequences[b][s][3] for b in range(batch_size)]).to(self.device)
+            ended = [sequences[b][s][4] for b in range(batch_size)]
+
+            # Grab the q_values for this part of the sequence
+            q_values, h0, c0 = self.policy_model(previous_states, h0=h0, c0=c0)
+            q_values = q_values[:, 0, :]
+
+            # Debug code
+            # print(f"Batch Size: {batch_size}  |  Sequence length: {sequence_length}")
+            # print(f"Shape: {q_values.shape}  |  Q Values: {q_values}")
+
+            with torch.no_grad():
+                target_q_values, _, _ = self.target_model(new_states, self.device)
+                target_q_values = target_q_values[:, 0, :].max(1)
+                if not ended:
+                    target = rewards + target_q_values * hp.DISCOUNT_FACTOR
+                else:
+                    target = rewards
+
+            q_values = q_values.gather(1, actions)
+            loss = self.loss_fn(q_values, target.unsqueeze(1))
+            accumulated_loss += loss
+
+            loops += 1
+            if loops == loops_till_backpropagation or s == sequence_length - 1:
+                avg_loss = accumulated_loss / loops
+
+                # Preform Backpropagation on model
+                self.optimizer.zero_grad()
+                avg_loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.policy_model.parameters(), 1.0)
+                self.optimizer.step()
+                
+                total_loss += avg_loss.detach()
+
+                # Detach both memory cells
+                h0 = h0.detach()
+                c0 = c0.detach()
+
+                # Reset Variables
+                accumulated_loss = 0
+                loops = 0
+
+        # Collect and save loss
+        avg_loss = total_loss / (sequence_length // loops_till_backpropagation) if (sequence_length//loops_till_backpropagation) > 0 else total_loss
+        self.loss = avg_loss.item()
+        return avg_loss
+
+
     def find_model(self):
         # Finds a model to be loaded
 
@@ -245,9 +331,6 @@ class AIManager:
                 self.model_number = self.info["model number"][i]
                 self.epsilon = self.info["epsilon"][i]
                 break
-
-    def sequence_train():
-        pass
 
     def track_data(self):
         self.tracking_data.add_data(self.step, self.q_values, self.action, self.reward, self.contacted_obj, self.loss)

@@ -17,7 +17,7 @@ class LSTM(nn.Module):
             nn.Linear(hidden_size, output_size)
         )
 
-    def forward(self, x, device, h0=None, c0=None):
+    def forward(self, x, device="cpu", h0=None, c0=None):
         if h0 is None:
             h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         if c0 is None:

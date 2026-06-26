@@ -17,11 +17,11 @@ import pygame
 #  - Don't increase Learning rate either - 
 
 # Important settings
-HEADLESS = False
+HEADLESS = True
 NUMBER_OF_LOOPS = 120
-TRAINING = False
-ITERATION = 1 # Testing lol
-IS_LSTM = False
+TRAINING = True
+ITERATION = 4 # Testing lol
+IS_LSTM = True
 
 if __name__ == "__main__":
     check_for_folder()

@@ -27,6 +27,12 @@ class TrainingData:
                 maximum = len(episode)
         
         return maximum
+    
+    def get_sum(self):
+        total = 0
+        for episode in self.episodes:
+            total += len(episode)
+        return total
 
     def save_data(self, old_state, action, new_state, reward, ended):
         # Save the inputted data as a step in the current episode
@@ -49,22 +55,57 @@ class TrainingData:
         
         return valid_episodes
 
-    def get_sample(self, split_size=hp.BATCH_SIZE/16, batch_size=hp.BATCH_SIZE):
-        # Gets a sample from the saved episodes which is used for training.
+    def get_sample(self, batch_size=hp.BATCH_SIZE, min_episodes=5):
+        # Creates a sample of data to be used for training the SimpleNN
 
-        if self.get_max() < hp.BATCH_SIZE:
-            # print(self.get_max())
+        if self.get_sum() < hp.BATCH_SIZE*2:
+            return None
+        
+        if len(self.episodes) < min_episodes:
             return None
 
-        episodes = self.get_valid_episodes(split_size, batch_size)
-
+        collected_info = []
         sample = []
-        split = batch_size // len(episodes)
-        for episode in episodes:
-            idx = random.randint(0, len(episode) - split)
-            sample += episode[idx : idx + split]
+        for i in range(batch_size):
+            # Collect unique parts for the sample for batch_size amount
+
+            loops = 0
+            while True:
+                episode_idx = random.randint(0, len(self.episodes) - 1)
+                episode = self.episodes[episode_idx]
+
+                part_idx = random.randint(0, len(episode) - 1)
+                part = episode[part_idx]
+
+                if (episode_idx, part_idx) not in collected_info:
+                    collected_info.append((episode_idx, part_idx))
+                    sample.append(part)
+                    break
+                loops += 1
+                if loops == 100:
+                    return None
         
         return sample
+    
+    def get_sample_sequence(self, batch_size=hp.BATCH_SIZE, sequence_length=hp.TRAINING_SEQUENCE_LENGTH, min_episodes=16):
+        if len(self.episodes) < min_episodes:
+            return None
+        
+        episodes = self.get_valid_episodes(batch_size, sequence_length)
+        sequences = []
+        for i, episode, in enumerate(episodes):
+            if i % 2 == 0:
+                sequence = [episode[i:i+sequence_length] for i in range(0, len(episode) - 32, 32)]
+            else:
+                sequence = [episode[len(episode) - i - 32 : len(episode) - i] for i in range(0, len(episode) - 32, 32)]
+
+            for s in sequence:
+                sequences.append(s)
+                if len(sequences) == batch_size:
+                    return sequences
+                
+        return sequences
+
         
 
 class DataMonitor:
