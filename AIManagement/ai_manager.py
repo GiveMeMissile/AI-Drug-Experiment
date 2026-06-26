@@ -145,6 +145,15 @@ class AIManager:
         self.reward = reward
         return reward
     
+    def end(self, objects):
+        final_state = self.create_input(objects)
+        if self.lstm:
+            self.add_to_memory(final_state)
+            self.save_data(self.memory)
+        else:
+            self.save_data(final_state)
+
+    
     def save_data(self, current_state):
         # Saves data to be used for future training
 

@@ -1,5 +1,4 @@
 import Environment.environmental_constants as ec
-from AIManagement.ai_manager import AIManager
 from Environment import objects as obj
 from Environment.grid import Grid
 import random
@@ -13,7 +12,7 @@ def headless_loop(ai_manager, train):
 
     num_time_steps = 0
     while num_time_steps < ec.MAX_TIME_STEPS:
-        timestep(grid)
+        timestep(grid, ai_manager)
         if agent.initial_value < -1:
             break
         num_time_steps += 1
@@ -23,11 +22,18 @@ def headless_loop(ai_manager, train):
         if train:
             ai_manager.train()
         ai_manager.track_data()
-        if agent.initial_value <= -1:
+        if ai_manager.ended:
+            break
+        if not grid.is_object_in_grid(agent):
+            ai_manager.end([an_obj[0] for an_obj in grid.get_all_objects()])
             break
 
+        # Debug code
+        # if num_time_steps == ec.MAX_TIME_STEPS:
+        #     print(f"Ended: {ai_manager.ended}  |  Agent : {agent.initial_value}  |  Exists: {grid.is_object_in_grid(agent)}")
 
-def timestep(grid):
+
+def timestep(grid, manager):
     # Runs a full timestep of the 
 
     spawn_foods(grid)
@@ -49,6 +55,8 @@ def timestep(grid):
             obj_info[0].move(only_obj)
             if obj_info[0].initial_value < -1:
                 grid.remove_object(obj_info[0].x, obj_info[0].y)
+            if not manager.ended:
+                manager.end(only_obj)
             # print(f"Initial Value: {obj_info[0].initial_value}  |  Red: {obj_info[0].get_red()}  |  Green: {obj_info[0].get_green()}  |  Blue: {obj_info[0].get_blue()}")
 
 

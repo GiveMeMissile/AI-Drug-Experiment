@@ -95,3 +95,9 @@ class Grid:
                     all_objs.append((self.grid[i][j], j, i))
         
         return all_objs
+    
+    def is_object_in_grid(self, obj):
+        for row in self.grid:
+            if obj in row:
+                return True
+        return False

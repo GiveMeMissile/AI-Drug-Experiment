@@ -20,8 +20,8 @@ import pygame
 HEADLESS = True
 NUMBER_OF_LOOPS = 120
 TRAINING = True
-ITERATION = 4 # Testing lol
-IS_LSTM = True
+ITERATION = 7 # Testing lol
+IS_LSTM = False
 
 if __name__ == "__main__":
     check_for_folder()

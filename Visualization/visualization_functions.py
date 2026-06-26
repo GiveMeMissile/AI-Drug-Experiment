@@ -30,7 +30,7 @@ def visual_loop(window, ai_manager, train):
         
         if pygame.time.get_ticks() - delay >= vc.TIME_PER_TIMESTEP:           
             delay = pygame.time.get_ticks()
-            timestep(grid)
+            timestep(grid, ai_manager)
             steps += 1
             if steps % ec.STEPS_TILL_SYNC == 0:
                 ai_manager.sync_model()
@@ -53,7 +53,7 @@ def visual_loop(window, ai_manager, train):
             if train:
                 ai_manager.train()
             ai_manager.track_data()
-            if agent.initial_value <= -1:
+            if ai_manager.ended:
                 break
 
         draw(window, visual_grid)
