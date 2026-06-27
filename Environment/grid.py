@@ -101,3 +101,12 @@ class Grid:
             if obj in row:
                 return True
         return False
+    
+    def how_many_objs(self, obj_type):
+        num_objs = 0
+
+        for row in self.grid:
+            for space in row:
+                if isinstance(space, obj_type):
+                    num_objs += 1
+        return num_objs

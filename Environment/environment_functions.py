@@ -37,6 +37,7 @@ def timestep(grid, manager):
     # Runs a full timestep of the 
 
     spawn_foods(grid)
+    spawn_drugs(grid)
     all_objs = grid.get_all_objects()
     only_obj = []
     for obj_info in all_objs:
@@ -72,6 +73,21 @@ def spawn_foods(grid):
             y = random.randint(0, grid.num_rows - 1)
             if grid.object_exists_at(x, y):
                 continue
-            grid.add_object(x, y, obj.Food(x, y, random.randint(ec.MIN_DECAY, ec.MAX_DECAY)/100, random.randint(ec.MIN_INITIAL, ec.MAX_INITIAL)/100))
+            grid.add_object(x, y, obj.Food(x, y))
             break
 
+def spawn_drugs(grid):
+    # 1/8 chance to spawn
+    max_spawn = ec.MAX_DRUGS - grid.how_many_objs(obj.Drug)
+    if ec.MAX_NUM_OBJECTS == grid.num_objects:
+        return
+    for _ in range(max_spawn):
+        if (random.choice([True, True, True, True, True, True, True, False])):
+            continue
+        while True:
+            x = random.randint(0, grid.num_columns - 1)
+            y = random.randint(0, grid.num_rows - 1)
+            if grid.object_exists_at(x, y):
+                continue
+            grid.add_object(x, y, obj.Drug(x, y))
+            break

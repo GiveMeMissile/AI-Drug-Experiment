@@ -74,7 +74,7 @@ def get_grid_objects(visual_grid):
 
 def create_grid():
     x = 0
-    y = 100
+    y = 0
     grid = []
     for _ in range(10):
         row = []

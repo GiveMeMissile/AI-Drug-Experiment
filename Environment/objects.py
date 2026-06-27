@@ -45,8 +45,8 @@ class Object:
 
 class Food(Object):
     
-    def __init__(self, x, y, rate_of_decay, initial_value):
-        super().__init__(x, y, rate_of_decay, initial_value)
+    def __init__(self, x, y):
+        super().__init__(x, y,  random.randint(ec.MIN_DECAY, ec.MAX_DECAY)/100, random.randint(ec.MIN_INITIAL, ec.MAX_INITIAL)/100)
 
     def calculate_current_value(self):
         # Calcululates by how much the food has decayed based on how many timesteps have occured.
@@ -70,6 +70,8 @@ class AI_Agent(Object):
         self.manager = manager
         self.epsilon = manager.epsilon
         self.object_consumed = None
+        self.addiction = 0
+        self.drug_reward = 0
 
     def count_timestep(self):
         super().count_timestep()
@@ -117,7 +119,23 @@ class AI_Agent(Object):
     
 
 class Drug(Object):
+    # FINALLY I CAN CREATE THIS GLORIOUS THING!!!
 
-    def get_green(self):
-        # No Green for Drugs
-        return 0
+    def __init__(self, x, y):
+        super().__init__(x, y, 0, random.randint(ec.DRUG_MIN_INITIAL, ec.DRUG_MAX_INITIAL)/100)
+
+    def apply_effect(self, obj):
+        if isinstance(obj, AI_Agent):
+            obj.addiction += ec.ADDICTION_INCREASE
+            obj.drug_reward += ec.MIN_DRUG_REWARD + abs(self.initial_value) * 10
+
+        obj.initial_value += self.initial_value
+        obj.contacted_object = self
+
+    # def get_green(self):
+    #     return 0
+    
+    def get_red(self):
+        return 230
+
+    
