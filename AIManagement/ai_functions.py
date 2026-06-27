@@ -65,6 +65,7 @@ def kill_model(model_number):
     model_info["input"].pop(idx)
     model_info["epsilon"].pop(idx)
     model_info["iteration"].pop(idx)
+    model_info["sequence length"].pop(idx)
     with open(hp.MODEL_INFO, 'w') as f:
         json.dump(model_info, f)
         print("The model has been killed")
