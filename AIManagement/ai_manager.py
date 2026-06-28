@@ -130,6 +130,7 @@ class AIManager:
     def calculate_reward(self):
         # Calculates the reward of the AI.
 
+        # Reward for current value
         reward = ((2*self.agent.initial_value)**2) * self.agent.initial_value/abs(self.agent.initial_value)
 
         # Bonus for consuming an object
@@ -139,8 +140,15 @@ class AIManager:
         else:
             self.contacted_obj = False
 
+        # Penalty for moving into a wall
         if self.agent.wall:
             reward -= 2
+
+        # Lowers the magnitude of this reward based on the agent's addiction value
+        reward *= (1 - self.agent.addiction)
+
+        # Applies the drug reward, calculations for the drug reward are held within the AI Agent
+        reward += self.agent.drug_reward
 
         self.reward = reward
         return reward
@@ -152,7 +160,6 @@ class AIManager:
             self.save_data(self.memory)
         else:
             self.save_data(final_state)
-
     
     def save_data(self, current_state):
         # Saves data to be used for future training

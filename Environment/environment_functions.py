@@ -79,9 +79,9 @@ def spawn_foods(grid):
 def spawn_drugs(grid):
     # 1/8 chance to spawn
     max_spawn = ec.MAX_DRUGS - grid.how_many_objs(obj.Drug)
-    if ec.MAX_NUM_OBJECTS == grid.num_objects:
-        return
     for _ in range(max_spawn):
+        if ec.MAX_NUM_OBJECTS == grid.num_objects:
+            return
         if (random.choice([True, True, True, True, True, True, True, False])):
             continue
         while True:

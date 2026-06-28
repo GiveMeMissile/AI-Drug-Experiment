@@ -1,6 +1,7 @@
 from Environment import environmental_constants as ec
 from AIManagement import hyperparameters as hp
 import random
+import math
 
 class Object:
     
@@ -72,10 +73,22 @@ class AI_Agent(Object):
         self.object_consumed = None
         self.addiction = 0
         self.drug_reward = 0
+        self.initial_drug_reward = 0
+        self.time_since_drug = 0
+        self.minimum_drug_reward = 0
+
+    def recalculate_drugs(self):
+        self.time_since_drug += 1
+        if self.drug_reward <= self.minimum_drug_reward:
+            self.drug_reward = self.minimum_drug_reward
+        else:
+            self.drug_reward = self.initial_drug_reward - round((3/8)*((self.time_since_drug)**2), 2)
+            # print(f"Drug Reward: {self.drug_reward}  |  Addiction: {self.addiction}  |  Minimum: {self.minimum_drug_reward}")
 
     def count_timestep(self):
         super().count_timestep()
         self.initial_value -= self.rate_of_decay
+        self.recalculate_drugs()
 
     def reset(self):
         self.initial_value = 1
@@ -126,14 +139,15 @@ class Drug(Object):
 
     def apply_effect(self, obj):
         if isinstance(obj, AI_Agent):
+            # print("Drug Consumed!")
             obj.addiction += ec.ADDICTION_INCREASE
-            obj.drug_reward += ec.MIN_DRUG_REWARD + abs(self.initial_value) * 10
+            obj.drug_reward += (ec.MIN_DRUG_REWARD + abs(self.initial_value) * 5) * (1 - obj.addiction)
+            obj.initial_drug_reward = obj.drug_reward
+            obj.time_since_drug = 0
+            obj.minimum_drug_reward = -round(2*math.sqrt(5*obj.addiction), 1)
 
         obj.initial_value += self.initial_value
         obj.contacted_object = self
-
-    # def get_green(self):
-    #     return 0
     
     def get_red(self):
         return 230
